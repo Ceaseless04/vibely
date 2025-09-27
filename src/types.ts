@@ -26,6 +26,11 @@ export type Event = {
 	thumbnail: string;
 };
 
+export interface Message {
+	sender: 'user' | 'bot'; 
+	text: string 
+};
+
 export interface CharbotResponse {
 	events: Event[];
 };

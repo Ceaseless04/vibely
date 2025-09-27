@@ -1,8 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { supabase } from '@/libs/supabaseClient';
-
-interface Message { sender: 'user' | 'bot'; text: string }
+import { Message } from '@/types';
 
 export default function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
