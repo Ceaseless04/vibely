@@ -28,7 +28,21 @@ export type Event = {
 
 export interface Message {
 	sender: 'user' | 'bot'; 
-	text: string 
+	text: string;
+	timestamp?: string;
+};
+
+export interface UserChat {
+	id: string;
+	title: string;
+	messages: Message[];
+	createdAt: string;
+};
+
+export interface SidebarProps {
+  chats: UserChat[];
+  selectedChatId: string | null;
+  onSelect: (chatId: string) => void;
 };
 
 export interface CharbotResponse {
@@ -40,3 +54,4 @@ export const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export const gemini_api = process.env.GEMINI_API_KEY!;
 export const serpapi = process.env.SERPAPI_KEY!;
+export const tomtom_api = process.env.TOMTOM_API_KEY;
