@@ -1,6 +1,6 @@
 'use client'
 import { supabase } from '@/libs/supabaseClient';
-import {useRouter} from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function AuthForm() {
@@ -32,14 +32,43 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="flex flex-col items-center mt-10 space-y-2">
-      <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="border p-2 rounded"/>
-      <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="border p-2 rounded"/>
-      <div className="space-x-2">
-        <button onClick={signIn} className="px-4 py-2 bg-blue-500 text-white rounded">Sign In</button>
-        <button onClick={signUp} className="px-4 py-2 bg-green-500 text-white rounded">Sign Up</button>
+    <div className="flex items-center justify-center min-h-screen bg-[#22223b]">
+      <div className="bg-[#4a4e69] rounded-2xl shadow-lg p-8 w-full max-w-md flex flex-col items-center border border-[#c9ada7]">
+        <h2 className="text-3xl font-bold mb-6 text-[#c9ada7]">Vibely Login</h2>
+        <input
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          className="w-full mb-4 p-3 rounded-lg bg-[#f2e9e4] text-[#22223b] placeholder-[#22223b] focus:outline-none focus:ring-2 focus:ring-[#c9ada7]"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          className="w-full mb-6 p-3 rounded-lg bg-[#f2e9e4] text-[#22223b] placeholder-[#22223b] focus:outline-none focus:ring-2 focus:ring-[#c9ada7]"
+        />
+        <div className="flex w-full gap-4 mb-4">
+          <button
+            onClick={signIn}
+            className="flex-1 px-4 py-2 bg-[#9a8c98] text-[#f2e9e4] font-semibold rounded-lg hover:bg-[#c9ada7] hover:text-[#22223b] transition"
+          >
+            Sign In
+          </button>
+          <button
+            onClick={signUp}
+            className="flex-1 px-4 py-2 bg-[#c9ada7] text-[#22223b] font-semibold rounded-lg hover:bg-[#9a8c98] hover:text-[#f2e9e4] transition"
+          >
+            Sign Up
+          </button>
+        </div>
+        <button
+          onClick={signInWithGoogle}
+          className="w-full px-4 py-2 bg-[#ea4335] text-white font-semibold rounded-lg hover:bg-[#c1351d] transition"
+        >
+          Sign in with Google
+        </button>
       </div>
-      <button onClick={signInWithGoogle} className="mt-2 px-4 py-2 bg-red-500 text-white rounded">Sign in with Google</button>
     </div>
   );
 }
