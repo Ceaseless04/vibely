@@ -54,4 +54,4 @@ export const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 export const gemini_api = process.env.GEMINI_API_KEY!;
 export const serpapi = process.env.SERPAPI_KEY!;
-export const tomtom_api = process.env.TOMTOM_API_KEY;
+export const tomtom_api = process.env.TOMTOM_API_KEY!;

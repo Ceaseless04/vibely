@@ -1,13 +1,20 @@
-'use client'
+"use client";
 
 import Navbar from '@/components/NavBar';
+import ShowMapSection from '@/components/ShowMapSection';
 import Sidebar from '@/components/SideBar';
 import { supabase } from '@/libs/supabaseClient';
-import { Message, UserChat } from '@/types';
-import { useEffect, useState } from 'react';
+import { Message, tomtom_api, UserChat } from '@/types';
+// import tt from '@tomtom-international/web-sdk-maps'; // Only import TomTom SDK client-side
+import dynamic from 'next/dynamic';
+import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
+const EventMapModal = dynamic(() => import('@/components/EventMapModal'), { ssr: false });
+
 export default function Chatbot() {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const ttMapInstance = useRef<any>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showMap, setShowMap] = useState(false);
   const [eventList, setEventList] = useState<any[]>([]); // For map modal
@@ -17,16 +24,49 @@ export default function Chatbot() {
   const [chats, setChats] = useState<UserChat[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
+  // Clean up TomTom map instance on modal close
   useEffect(() => {
-    // Ask for user location on mount
-    if (navigator.geolocation) {
+    let tt: any;
+    const loadMap = async () => {
+      if (showMap && mapRef.current && userLocation) {
+        if (ttMapInstance.current) {
+          ttMapInstance.current.remove();
+        }
+        tt = (await import('@tomtom-international/web-sdk-maps')).default;
+        ttMapInstance.current = tt.map({
+          key: tomtom_api!,
+          container: mapRef.current,
+          center: [userLocation.lng, userLocation.lat],
+          zoom: 12
+        });
+        // Add event markers
+        eventList.forEach(ev => {
+          if (ev.lat && ev.lng) {
+            const marker = new tt.Marker().setLngLat([ev.lng, ev.lat]).addTo(ttMapInstance.current);
+            marker.getElement().title = ev.title;
+          }
+        });
+      }
+    };
+    loadMap();
+    return () => {
+      if (ttMapInstance.current) {
+        ttMapInstance.current.remove();
+        ttMapInstance.current = null;
+      }
+    };
+  }, [showMap, userLocation, eventList]);
+
+  // Ask for user location on mount (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         pos => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
         err => console.log('Location error:', err)
       );
     }
-    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user || null));
   }, []);
+  supabase.auth.getSession().then(({ data }) => setUser(data.session?.user || null));
 
   if (!user) return (
     <div className="flex items-center justify-center min-h-screen bg-blackCustom">
@@ -125,33 +165,14 @@ export default function Chatbot() {
               ))
             )}
             {/* See events on a map section */}
-            {eventList.length > 0 && (
-              <div className="mt-8 flex flex-col items-center">
-                <div className="mb-2 text-lg text-[#c9ada7]">Would you like to see these events on a map?</div>
-                <button
-                  className="px-4 py-2 bg-[#9a8c98] text-[#f2e9e4] rounded-lg font-semibold shadow hover:bg-[#c9ada7] hover:text-[#22223b] transition"
-                  onClick={() => setShowMap(true)}
-                >
-                  Show Map
-                </button>
-              </div>
-            )}
+            <ShowMapSection eventList={eventList} onShowMap={() => setShowMap(true)} />
             {/* Map Modal */}
-            {showMap && (
-              <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-                <div className="bg-[#f2e9e4] rounded-2xl shadow-lg p-8 w-full max-w-2xl relative">
-                  <button
-                    className="absolute top-4 right-4 px-3 py-1 bg-[#9a8c98] text-[#f2e9e4] rounded"
-                    onClick={() => setShowMap(false)}
-                  >
-                    Close
-                  </button>
-                  <h3 className="text-2xl font-bold mb-4 text-[#22223b]">Events Map</h3>
-                  {/* Map and filters will go here */}
-                  <div className="text-[#22223b]">Map coming soon...</div>
-                </div>
-              </div>
-            )}
+            <EventMapModal
+              show={showMap}
+              onClose={() => setShowMap(false)}
+              userLocation={userLocation}
+              eventList={eventList}
+            />
           </div>
           {/* Input */}
           <div className="sticky bottom-0 w-full bg-[#22223b] px-8 py-6 flex gap-4 items-center border-t border-[#c9ada7]">
